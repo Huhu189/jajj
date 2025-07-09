@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>TimeLink Viewer</title>
+  <style>
+    body { font-family: Arial; padding: 20px; background: #fffde7; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
+    input { padding: 8px; width: 100%; margin-top: 10px; }
+    button { padding: 8px; margin-top: 10px; width: 100%; }
+    .countdown { font-weight: bold; color: orange; }
+    .success { color: green; font-weight: bold; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h2>🔐 Link Terkunci</h2>
+  <p id="status">⏳ Memeriksa waktu link...</p>
+  <div id="pw-area" style="display:none;">
+    <input type="password" id="pw-input" placeholder="Masukkan password">
+    <button onclick="checkPassword()">Buka Link</button>
+    <p id="pw-error" style="color:red;"></p>
+  </div>
+  <p id="countdown" class="countdown"></p>
+  <p><a id="target-link" href="#" style="display:none;" target="_blank" class="success">✅ Buka Link Sekarang</a></p>
+</div>
+
+<script>
+  const params = new URLSearchParams(location.search);
+  const url = decodeURIComponent(params.get('url') || "");
+  const startTime = new Date(params.get('start'));
+  const endTime = new Date(params.get('end'));
+  const correctPw = decodeURIComponent(params.get('pw') || "");
+
+  const now = new Date();
+  const pwArea = document.getElementById("pw-area");
+  const countdown = document.getElementById("countdown");
+  const status = document.getElementById("status");
+  const link = document.getElementById("target-link");
+
+  function checkPassword() {
+    const input = document.getElementById("pw-input").value;
+    if (input === correctPw) {
+      link.href = url;
+      link.style.display = "block";
+      document.getElementById("pw-error").innerText = "";
+    } else {
+      document.getElementById("pw-error").innerText = "Password salah!";
+    }
+  }
+
+  function update() {
+    const now = new Date();
+    if (!url || !startTime || !endTime || !correctPw) {
+      status.innerText = "❌ Parameter link tidak lengkap.";
+      return;
+    }
+
+    if (now < startTime) {
+      const s = Math.floor((startTime - now) / 1000);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const d = s % 60;
+      countdown.innerText = `Link aktif dalam ${h}j ${m}m ${d}d`;
+      status.innerText = "⏳ Belum aktif";
+      pwArea.style.display = "none";
+    } else if (now > endTime) {
+      status.innerText = "❌ Link sudah kadaluarsa.";
+      countdown.innerText = "";
+      pwArea.style.display = "none";
+    } else {
+      status.innerText = "🔓 Link aktif! Masukkan password:";
+      countdown.innerText = "";
+      pwArea.style.display = "block";
+    }
+  }
+
+  setInterval(update, 1000);
+</script>
+</body>
+</html>
