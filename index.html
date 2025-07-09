@@ -2,48 +2,121 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>TimeLink Generator</title>
+  <title>TimeLink All-in-One</title>
   <style>
     body { font-family: Arial; padding: 20px; background: #f8f8f8; }
     .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
     input, button { padding: 8px; margin: 5px 0; width: 100%; }
-    .output { background: #f0f0f0; padding: 10px; word-break: break-word; border-radius: 8px; }
+    .output { background: #f0f0f0; padding: 10px; border-radius: 8px; word-break: break-word; }
+    .hidden { display: none; }
+    .countdown { font-weight: bold; color: orange; }
+    .success { color: green; font-weight: bold; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2>🔗 Buat Smart Link (Time + Password)</h2>
 
-    <label>URL Tujuan:</label>
-    <input type="text" id="url" placeholder="https://example.com">
+<div class="container" id="generator">
+  <h2>🔗 Buat Smart Link (dengan Waktu + Password)</h2>
+  <label>URL Tujuan:</label>
+  <input type="text" id="url" placeholder="https://example.com">
 
-    <label>Waktu Mulai:</label>
-    <input type="datetime-local" id="start">
+  <label>Waktu Mulai:</label>
+  <input type="datetime-local" id="start">
 
-    <label>Waktu Berakhir:</label>
-    <input type="datetime-local" id="end">
+  <label>Waktu Berakhir:</label>
+  <input type="datetime-local" id="end">
 
-    <label>Password Akses:</label>
-    <input type="text" id="password" placeholder="Contoh: rahasia123">
+  <label>Password Akses:</label>
+  <input type="text" id="password" placeholder="Contoh: rahasia123">
 
-    <button onclick="generate()">🔐 Buat Link</button>
+  <button onclick="generate()">🔐 Buat Link</button>
 
-    <h3>Hasil Link:</h3>
-    <div class="output" id="output">Belum dibuat...</div>
+  <h3>Hasil Link:</h3>
+  <div class="output" id="output">Belum dibuat...</div>
+</div>
+
+<div class="container hidden" id="viewer">
+  <h2>🔐 Akses Link</h2>
+  <p id="status">⏳ Memeriksa waktu link...</p>
+  <div id="pw-area" style="display:none;">
+    <input type="password" id="pw-input" placeholder="Masukkan password">
+    <button onclick="checkPassword()">Buka Link</button>
+    <p id="pw-error" style="color:red;"></p>
   </div>
+  <p id="countdown" class="countdown"></p>
+  <p><a id="target-link" href="#" style="display:none;" target="_blank" class="success">✅ Buka Link Sekarang</a></p>
+</div>
 
-  <script>
-    function generate() {
-      const base = location.href.replace("index.html", "viewer.html");
+<script>
+  // Mode otomatis: jika ada parameter, masuk ke mode viewer
+  const params = new URLSearchParams(window.location.search);
+  if (params.has("url")) {
+    document.getElementById("generator").style.display = "none";
+    document.getElementById("viewer").classList.remove("hidden");
 
-      const url = encodeURIComponent(document.getElementById('url').value);
-      const start = encodeURIComponent(document.getElementById('start').value);
-      const end = encodeURIComponent(document.getElementById('end').value);
-      const pw = encodeURIComponent(document.getElementById('password').value);
+    const url = decodeURIComponent(params.get('url'));
+    const startTime = new Date(params.get('start'));
+    const endTime = new Date(params.get('end'));
+    const correctPw = decodeURIComponent(params.get('pw'));
 
-      const link = `${base}?url=${url}&start=${start}&end=${end}&pw=${pw}`;
-      document.getElementById('output').innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
+    const status = document.getElementById("status");
+    const countdown = document.getElementById("countdown");
+    const pwArea = document.getElementById("pw-area");
+    const link = document.getElementById("target-link");
+
+    function checkPassword() {
+      const input = document.getElementById("pw-input").value;
+      if (input === correctPw) {
+        link.href = url;
+        link.style.display = "block";
+        document.getElementById("pw-error").innerText = "";
+      } else {
+        document.getElementById("pw-error").innerText = "Password salah!";
+      }
     }
-  </script>
+
+    function update() {
+      const now = new Date();
+      if (!url || !startTime || !endTime || !correctPw) {
+        status.innerText = "❌ Link rusak atau parameter tidak lengkap.";
+        return;
+      }
+
+      if (now < startTime) {
+        const s = Math.floor((startTime - now) / 1000);
+        const h = Math.floor(s / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const d = s % 60;
+        countdown.innerText = `Link aktif dalam ${h}j ${m}m ${d}d`;
+        status.innerText = "⏳ Belum aktif";
+        pwArea.style.display = "none";
+      } else if (now > endTime) {
+        status.innerText = "❌ Link sudah kadaluarsa.";
+        countdown.innerText = "";
+        pwArea.style.display = "none";
+      } else {
+        status.innerText = "🔓 Link aktif! Masukkan password:";
+        countdown.innerText = "";
+        pwArea.style.display = "block";
+      }
+    }
+
+    setInterval(update, 1000);
+  }
+
+  // Fungsi generator
+  function generate() {
+    const base = window.location.origin + window.location.pathname;
+
+    const url = encodeURIComponent(document.getElementById('url').value);
+    const start = encodeURIComponent(document.getElementById('start').value);
+    const end = encodeURIComponent(document.getElementById('end').value);
+    const pw = encodeURIComponent(document.getElementById('password').value);
+
+    const link = `${base}?url=${url}&start=${start}&end=${end}&pw=${pw}`;
+    document.getElementById('output').innerHTML = `<a href="${link}" target="_blank">${link}</a>`;
+  }
+</script>
+
 </body>
 </html>
