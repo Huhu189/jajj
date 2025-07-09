@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>TimeLink All-in-One</title>
+  <title>TimeLink htt</title>
   <style>
     body { font-family: Arial; padding: 20px; background: #f8f8f8; }
     .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #ccc; }
@@ -16,14 +16,14 @@
 <body>
 
 <div class="container" id="generator">
-  <h2>🔗 Buat Smart Link (dengan Waktu + Password)</h2>
-  <label>URL Tujuan:</label>
+  <h2>password link generator</h2>
+  <label>URL</label>
   <input type="text" id="url" placeholder="https://example.com">
 
-  <label>Waktu Mulai:</label>
+  <label>Waktu nya Mulainya kapan </label>
   <input type="datetime-local" id="start">
 
-  <label>Waktu Berakhir:</label>
+  <label>Waktu Berakhir nya kapan:</label>
   <input type="datetime-local" id="end">
 
   <label>Password Akses:</label>
@@ -36,8 +36,8 @@
 </div>
 
 <div class="container hidden" id="viewer">
-  <h2>🔐 Akses Link</h2>
-  <p id="status">⏳ Memeriksa waktu link...</p>
+  <h2>password nya</h2>
+  <p id="status"> Memeriksa waktu link</p>
   <div id="pw-area" style="display:none;">
     <input type="password" id="pw-input" placeholder="Masukkan password">
     <button onclick="checkPassword()">Buka Link</button>
@@ -91,7 +91,7 @@
         status.innerText = "⏳ Belum aktif";
         pwArea.style.display = "none";
       } else if (now > endTime) {
-        status.innerText = "❌ Link sudah kadaluarsa.";
+        status.innerText = " Link sudah kadaluarsa.";
         countdown.innerText = "";
         pwArea.style.display = "none";
       } else {
